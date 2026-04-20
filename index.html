@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Epstein Engine</title>
+    <style>
+        :root {
+            --glass: rgba(255, 255, 255, 0.1);
+            --border: rgba(255, 255, 255, 0.2);
+        }
+        body {
+            background: #0f172a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: white;
+            font-family: 'Inter', sans-serif;
+        }
+        .bento-card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        canvas {
+            image-rendering: pixelated; /* Keeps the pixel art sharp */
+            border-radius: 12px;
+            background: #1e293b;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+<div class="bento-card">
+    <canvas id="gameCanvas" width="400" height="300"></canvas>
+</div>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const spriteSheet = new Image();
+    spriteSheet.src = 'character.png'; // Make sure this matches your filename!
+
+    // IMPORTANT: You need to set these based on your sprite sheet's pixel grid
+    const frameWidth = 100;  
+    const frameHeight = 120;
+    
+    let x = 150;
+    let y = 100;
+    let frameIndex = 0;
+    let currentRow = 0; // 0 = Idle, 1 = Walk, etc.
+    let gameFrame = 0;
+    const staggerFrames = 10; // Controls speed of animation
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Calculate which frame to show
+        let position = Math.floor(gameFrame / staggerFrames) % 8; // Assuming 8 frames per row
+        
+        // Draw the slice: (image, sourceX, sourceY, sourceW, sourceH, destX, destY, destW, destH)
+        ctx.drawImage(
+            spriteSheet, 
+            position * frameWidth, currentRow * frameHeight, 
+            frameWidth, frameHeight, 
+            x, y, 
+            frameWidth, frameHeight
+        );
+
+        gameFrame++;
+        requestAnimationFrame(animate);
+    }
+
+    spriteSheet.onload = () => {
+        animate();
+    };
+
+    // Keyboard movement
+    window.addEventListener('keydown', (e) => {
+        if(e.key === 'ArrowRight') { x += 10; currentRow = 1; } // Switch to walk row
+        if(e.key === 'ArrowLeft') { x -= 10; currentRow = 1; }
+    });
+    
+    window.addEventListener('keyup', () => {
+        currentRow = 0; // Back to Idle row when key is released
+    });
+
+</script>
+</body>
+</html>
